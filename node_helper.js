@@ -8,7 +8,7 @@ module.exports = NodeHelper.create({
   
   python_start: function () {
     const self = this;
-    const pyshell = new PythonShell('modules/' + this.name + '/facerecognition/facerecognition.py', { mode: 'json', args: [JSON.stringify(this.config)]});
+    const pyshell = new PythonShell('modules/' + this.name + '/server.py', { mode: 'json'});
 
     pyshell.on('message', function (message) {
       
@@ -16,12 +16,15 @@ module.exports = NodeHelper.create({
       console.log("[" + self.name + "] " + message.status);
       }
       if (message.hasOwnProperty('login')){
-        console.log("[" + self.name + "] " + "User " + self.config.users[message.login.user - 1] + " with confidence " + message.login.confidence + " logged in.");
-        self.sendSocketNotification('user', {action: "login", user: message.login.user - 1, confidence: message.login.confidence});
-        }
+	console.log(message);
+	var user = message.login.user > 0 ? message.login.user : 0;
+	console.log("[" + self.name + "] " + "User " + self.config.users[user] + " with confidence " + message.login.confidence + " logged in.");
+	self.sendSocketNotification('user', {action: "login", user: user, confidence: message.login.confidence});
+      }	
       if (message.hasOwnProperty('logout')){
-        console.log("[" + self.name + "] " + "User " + self.config.users[message.logout.user - 1] + " logged out.");
-        self.sendSocketNotification('user', {action: "logout", user: message.logout.user - 1});
+	var user = message.logout.user > 0 ? message.logout.user : 0;
+        console.log("[" + self.name + "] " + "User " + self.config.users[user] + " logged out.");
+        self.sendSocketNotification('user', {action: "logout", user: user});
         }
     });
 
